@@ -1,0 +1,15 @@
+article_no;description;collection;brand;material;care;color_code;color_name;size;quantity;ean;net_price;srp
+UT-1001;Boxy Logo Tee;Drop 1;UrbanThreads;100% organic cotton;Machine wash cold, tumble dry low;001;Washed Black;S;12;4056789000012;9,50;29,90
+UT-1001;Boxy Logo Tee;Drop 1;UrbanThreads;100% organic cotton;Machine wash cold, tumble dry low;001;Washed Black;M;18;4056789000029;9,50;29,90
+UT-1001;Boxy Logo Tee;Drop 1;UrbanThreads;100% organic cotton;Machine wash cold, tumble dry low;001;Washed Black;L;18;4056789000036;9,50;29,90
+UT-1001;Boxy Logo Tee;Drop 1;UrbanThreads;100% organic cotton;Machine wash cold, tumble dry low;001;Washed Black;XL;6;4056789000043;9,50;29,90
+UT-1001;Boxy Logo Tee;Drop 1;UrbanThreads;100% organic cotton;Machine wash cold, tumble dry low;002;Bone;S;0;4056789000050;9,50;29,90
+UT-1001;Boxy Logo Tee;Drop 1;UrbanThreads;100% organic cotton;Machine wash cold, tumble dry low;002;Bone;M;10;4056789000067;9,50;29,90
+UT-1001;Boxy Logo Tee;Drop 1;UrbanThreads;100% organic cotton;Machine wash cold, tumble dry low;002;Bone;L;10;4056789000074;9,50;29,90
+UT-2044;Wide Leg Cargo Pant;Drop 1;UrbanThreads;68% cotton, 32% nylon;Machine wash cold, hang dry;050;Olive;M;8;4056789020045;28,00;79,00
+UT-2044;Wide Leg Cargo Pant;Drop 1;UrbanThreads;68% cotton, 32% nylon;Machine wash cold, hang dry;050;Olive;L;8;4056789020052;28,00;79,00
+UT-2044;Wide Leg Cargo Pant;Drop 1;UrbanThreads;68% cotton, 32% nylon;Machine wash cold, hang dry;050;Olive;XL;4;;28,00;79,00
+SHIPPING;Freight and handling;;;;;;;;1;;12,00;
+UT-3300;Half-Zip Fleece;Drop 1;UrbanThreads;100% polyester fleece;;001;Washed Black;S;5;4056789033007;22,00;
+UT-3300;Half-Zip Fleece;Drop 1;UrbanThreads;100% polyester fleece;;001;Washed Black;M;9;4056789033014;22,00;
+UT-3300;Half-Zip Fleece;Drop 1;UrbanThreads;100% polyester fleece;;001;Washed Black;L;9;4056789033021;22,00;

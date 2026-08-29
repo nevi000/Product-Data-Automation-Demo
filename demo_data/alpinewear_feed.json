@@ -1,0 +1,78 @@
+{
+  "supplier": "AlpineWear",
+  "generated_at": "2026-02-01",
+  "currency": "EUR",
+  "products": [
+    {
+      "sku": "AW-4471",
+      "name": "Ridgeline Insulated Jacket",
+      "collection": "AW26",
+      "brand": "AlpineWear",
+      "status": "active",
+      "material": "100% recycled polyester, PrimaLoft insulation",
+      "care": "Machine wash cold, do not tumble dry, do not iron",
+      "color": { "name": "Forest Green", "code": "GRN" },
+      "wholesale_price": "84.00 EUR",
+      "rrp": "199.00 EUR",
+      "sizes": {
+        "S":  { "ean": "4012345000015" },
+        "M":  { "ean": "4012345000022" },
+        "L":  { "ean": "4012345000039" },
+        "XL": { "ean": "4012345000046" }
+      }
+    },
+    {
+      "sku": "AW-4472",
+      "name": "Ridgeline Insulated Jacket",
+      "collection": "AW26",
+      "brand": "AlpineWear",
+      "status": "active",
+      "material": "100% recycled polyester, PrimaLoft insulation",
+      "care": "Machine wash cold, do not tumble dry, do not iron",
+      "color": { "name": "Slate Grey", "code": "GRY" },
+      "wholesale_price": "84.00 EUR",
+      "rrp": "199.00 EUR",
+      "sizes": {
+        "S":  { "ean": "4012345000053" },
+        "M":  { "ean": "4012345000060" },
+        "L":  { "ean": "4012345000077" }
+      }
+    },
+    {
+      "sku": "AW-2210",
+      "name": "Merino Base Layer Crew",
+      "collection": "AW26",
+      "brand": "AlpineWear",
+      "status": "active",
+      "material": "87% merino wool, 13% nylon",
+      "care": "Machine wash warm (max 40C), do not bleach, dry flat",
+      "color": "Charcoal",
+      "color_code": "CHR",
+      "wholesale_price": 39.5,
+      "sizes": ["XS", "S", "M", "L", "XL"]
+    },
+    {
+      "sku": "AW-9001",
+      "name": "Summit Wool Beanie",
+      "collection": "AW26",
+      "brand": "AlpineWear",
+      "status": "active",
+      "material": "100% lambswool",
+      "color": "Rust",
+      "wholesale_price": "12.90 EUR",
+      "rrp": "34.90 EUR",
+      "ean": "4012345099013",
+      "sizes": {}
+    },
+    {
+      "sku": "AW-4470",
+      "name": "Ridgeline Insulated Jacket",
+      "collection": "SS26",
+      "brand": "AlpineWear",
+      "status": "discontinued",
+      "color": { "name": "Black", "code": "BLK" },
+      "wholesale_price": "84.00 EUR",
+      "sizes": { "M": { "ean": "4012345000108" } }
+    }
+  ]
+}
