@@ -1,0 +1,38 @@
+# ─── secrets / env ───────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+credentials.json
+secrets.*
+
+# ─── python ──────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+.coverage
+htmlcov/
+
+# ─── node / frontend ─────────────────────────────────────────────
+node_modules/
+frontend/dist/
+frontend/.vite/
+npm-debug.log*
+
+# ─── runtime output ──────────────────────────────────────────────
+demo_data/_storage_out/
+*.log
+logs/
+
+# ─── editors / os ────────────────────────────────────────────────
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

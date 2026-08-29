@@ -1,0 +1,21 @@
+[project]
+name = "product-data-automation"
+version = "1.0.0"
+description = "Public portfolio version of an e-commerce product-onboarding platform"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.per-file-ignores]
+# FastAPI depends on call-in-default for Depends/File/Form
+"app/api/*" = ["B008"]

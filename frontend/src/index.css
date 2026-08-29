@@ -1,0 +1,102 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --dur: 140ms;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background-color: theme('colors.canvas');
+  color: theme('colors.ink.DEFAULT');
+  font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial,
+    sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  font-feature-settings: 'cv05' 1, 'ss01' 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3 {
+  font-feature-settings: 'ss01' 1;
+}
+
+/* tabular figures for anything numeric (SKUs, prices, counts) */
+.tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+/* one consistent, visible keyboard focus */
+:where(button, a, input, select, textarea, [role='switch'], [tabindex]):focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px theme('colors.canvas'), 0 0 0 4px theme('colors.primary.DEFAULT');
+  border-radius: 6px;
+}
+
+/* skeleton shimmer */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: #ecebe4;
+}
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+  animation: shimmer 1.5s infinite;
+}
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* animated disclosure (grid-rows trick, no JS height measurement) */
+.disclosure {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--dur) var(--ease);
+}
+.disclosure[data-open='true'] {
+  grid-template-rows: 1fr;
+}
+.disclosure > div {
+  overflow: hidden;
+}
+
+/* thin, unobtrusive scrollbars inside panels */
+.scroll-slim {
+  scrollbar-width: thin;
+  scrollbar-color: theme('colors.hairline.strong') transparent;
+}
+.scroll-slim::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.scroll-slim::-webkit-scrollbar-thumb {
+  background: theme('colors.hairline.strong');
+  border: 3px solid theme('colors.surface.DEFAULT');
+  border-radius: 999px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
