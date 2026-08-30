@@ -1,0 +1,196 @@
+"""In-memory shop adapter.
+
+Stands in for the Shopware Admin API client. It keeps the parts of that client
+that are actually interesting engineering:
+
+* a **payload builder** that assembles a parent product + size variants +
+  configurator settings + properties + prices in one place,
+* **idempotent** "get or create" for property options,
+* a **taxonomy** (categories + property groups) so enrichment and the reviewer
+  have something real to choose from.
+
+It does *not* talk to any network and has no credentials. The category tree and
+property options below are invented for a fictional outdoor / apparel retailer.
+"""
+
+from __future__ import annotations
+
+import uuid
+
+from app.domain.models import NormalizedProduct
+from app.services.shop.base import ShopClient, ShopProduct, ShopWriteError
+
+_BASE_URL = "https://demo-shop.local/admin"
+
+# Flat "A / B / C" paths; the frontend builds the expandable tree from them.
+_CATEGORIES = [
+    "Home / Women / Outerwear / Insulated Jackets",
+    "Home / Women / Outerwear / Shell Jackets",
+    "Home / Women / Outerwear / Fleece & Midlayers",
+    "Home / Women / Base Layers / Tops",
+    "Home / Women / Base Layers / Bottoms",
+    "Home / Women / Knitwear",
+    "Home / Women / Trousers",
+    "Home / Men / Outerwear / Insulated Jackets",
+    "Home / Men / Outerwear / Shell Jackets",
+    "Home / Men / Outerwear / Fleece & Midlayers",
+    "Home / Men / Base Layers / Tops",
+    "Home / Men / Knitwear",
+    "Home / Men / Trousers",
+    "Home / Footwear / Trail Running",
+    "Home / Footwear / Hiking Boots",
+    "Home / Footwear / Everyday",
+    "Home / Accessories / Headwear",
+    "Home / Accessories / Gloves & Mitts",
+    "Home / Accessories / Bags & Packs",
+    "Home / Home & Travel / Blankets & Throws",
+    "Home / Home & Travel / Drinkware",
+]
+
+# Single-select property groups (the reviewer picks at most one option per group).
+# "Material" and "Care" are handled as dedicated free-text fields, not here.
+_PROPERTY_OPTIONS = {
+    "Color": [
+        "Black", "Navy", "Slate Grey", "Charcoal", "Forest Green", "Rust",
+        "Sand", "Bone", "Olive", "Off-White",
+    ],
+    "Fit": ["Slim", "Regular", "Relaxed", "Oversized"],
+    "Sleeve length": ["Sleeveless", "Short sleeve", "3/4 sleeve", "Long sleeve"],
+    "Product style": ["Casual", "Technical", "Outdoor", "Performance", "Loungewear"],
+    "Neckline": ["Crew", "V-neck", "Half-zip", "Full-zip", "Hooded"],
+}
+
+
+def _new_id() -> str:
+    return uuid.uuid4().hex
+
+
+class MockShopAdapter(ShopClient):
+    def __init__(self) -> None:
+        # group -> {value_lower -> option_id}
+        self._options: dict[str, dict[str, str]] = {
+            g: {v.lower(): _new_id() for v in vals}
+            for g, vals in _PROPERTY_OPTIONS.items()
+        }
+        self._products: dict[str, ShopProduct] = {}
+
+    # reads ------------------------------------------------------------------
+
+    def list_category_paths(self) -> list[str]:
+        return list(_CATEGORIES)
+
+    def list_property_options(self) -> dict[str, list[str]]:
+        return {g: list(v) for g, v in _PROPERTY_OPTIONS.items()}
+
+    def get_product(self, product_number: str) -> ShopProduct | None:
+        return self._products.get(product_number)
+
+    # writes ---------------------------------------------------------------
+
+    def upsert_property_option(self, group: str, value: str) -> str:
+        bucket = self._options.setdefault(group, {})
+        key = value.strip().lower()
+        if key not in bucket:
+            bucket[key] = _new_id()
+        return bucket[key]
+
+    def create_product(self, product: NormalizedProduct) -> ShopProduct:
+        if not product.name.strip():
+            raise ShopWriteError("cannot create a product without a name")
+        if product.retail_price is None:
+            raise ShopWriteError("cannot create a product without a retail price")
+        if not product.categories:
+            raise ShopWriteError("cannot create a product without a category")
+        if product.product_number in self._products:
+            raise ShopWriteError(
+                f"product {product.product_number!r} already exists"
+            )
+
+        payload = self._build_payload(product)
+        shop_product = ShopProduct(
+            id=payload["id"],
+            product_number=product.product_number,
+            name=product.name,
+            variant_count=len(payload["children"]),
+            category_paths=product.categories,
+            property_count=len(payload["properties"]),
+            image_count=len(product.image_urls),
+            url=f"{_BASE_URL}/product/{payload['id']}",
+            payload=payload,
+        )
+        self._products[product.product_number] = shop_product
+        return shop_product
+
+    # payload builder ----------------------------------------------------
+
+    def _build_payload(self, product: NormalizedProduct) -> dict:
+        """Assemble the full write payload — parent + variants + properties.
+
+        Mirrors `ShopwareClient.build_product_payload` in shape: one parent, one
+        child per active size, configurator settings referencing the resolved
+        size options, defaults of stock=0 / active=False.
+        """
+        parent_id = _new_id()
+
+        size_option_ids = {
+            v.size: self.upsert_property_option("Size", v.size)
+            for v in product.active_variants
+        }
+
+        children = [
+            {
+                "id": _new_id(),
+                "productNumber": f"{product.product_number}.{i}",
+                "stock": 0,
+                "active": False,
+                "options": [{"id": size_option_ids[v.size]}],
+                **({"ean": v.ean} if v.ean else {}),
+            }
+            for i, v in enumerate(product.active_variants, start=1)
+        ]
+
+        properties = [
+            {"group": group, "value": value, "id": self.upsert_property_option(group, value)}
+            for group, value in product.properties.items()
+        ]
+        if product.material:
+            properties.append({
+                "group": "Material", "value": product.material,
+                "id": self.upsert_property_option("Material", product.material),
+            })
+        if product.care_instructions:
+            properties.append({
+                "group": "Care", "value": product.care_instructions,
+                "id": self.upsert_property_option("Care", product.care_instructions),
+            })
+
+        payload: dict = {
+            "id": parent_id,
+            "productNumber": product.product_number,
+            "name": product.name,
+            "description": product.description or "",
+            "manufacturer": product.manufacturer.name if product.manufacturer else None,
+            "productType": product.product_type,
+            "sizeChartId": product.size_chart,
+            "stock": 0,
+            "active": False,
+            "price": [{"gross": float(product.retail_price.amount),
+                       "currency": product.retail_price.currency}],
+            "categories": [{"path": p} for p in product.categories],
+            "properties": properties,
+            "children": children,
+            "configuratorSettings": [
+                {"id": _new_id(), "optionId": oid}
+                for oid in size_option_ids.values()
+            ],
+            "media": [{"url": u, "position": i}
+                      for i, u in enumerate(product.image_urls)],
+        }
+        if product.purchase_price:
+            payload["purchasePrice"] = {
+                "gross": float(product.purchase_price.amount),
+                "currency": product.purchase_price.currency,
+            }
+        if product.ean:
+            payload["ean"] = product.ean
+        return payload
