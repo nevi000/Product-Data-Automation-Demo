@@ -1,15 +1,3 @@
-"""Normalization: RawSupplierProduct -> NormalizedProduct.
-
-This is where the supplier-specific mess is turned into the one canonical shape:
-
-* build a stable, shop-facing product number,
-* fold model + colour into a display name (without duplicating the colour),
-* attach per-size EANs to variants,
-* apply the pricing policy when the supplier gave no retail price.
-
-It is intentionally supplier-agnostic — it only sees `RawSupplierProduct`.
-"""
-
 from __future__ import annotations
 
 from app.domain.models import (
@@ -24,13 +12,15 @@ from app.utils.text import slugify, titleize
 
 def _product_number(raw: RawSupplierProduct) -> str:
     base = raw.source_reference or raw.model_name or "item"
+    #make a list of one element
     parts = [slugify(base)]
+    #is there a color code, add it to the parts
     if raw.color_code:
         parts.append(slugify(raw.color_code))
+    #otherwise, if there is a color name, add it to the parts
     elif raw.color_name:
         parts.append(slugify(raw.color_name))
     return "_".join(p for p in parts if p)
-
 
 def _display_name(raw: RawSupplierProduct) -> str:
     model = titleize(raw.model_name or raw.source_reference or "Product")
@@ -38,7 +28,6 @@ def _display_name(raw: RawSupplierProduct) -> str:
     if not color or color.lower() in model.lower():
         return model
     return f"{model} {titleize(color)}"
-
 
 def normalize(
     raw: RawSupplierProduct,
@@ -49,9 +38,7 @@ def normalize(
         Variant(size=size, ean=raw.ean_by_size.get(size), active=True)
         for size in _dedupe(raw.sizes)
     ]
-
     retail = raw.suggested_retail_price or pricing.suggest_retail(raw.purchase_price)
-
     manufacturer = None
     if raw.manufacturer:
         manufacturer = ManufacturerRef(name=titleize(raw.manufacturer))
@@ -71,7 +58,6 @@ def normalize(
         purchase_price=raw.purchase_price,
         retail_price=retail,
     )
-
 
 def _dedupe(items: list[str]) -> list[str]:
     seen: set[str] = set()
