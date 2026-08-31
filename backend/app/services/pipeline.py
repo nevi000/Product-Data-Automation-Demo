@@ -1,22 +1,3 @@
-"""Pipeline orchestration.
-
-Ties the stages together:
-
-    extract  ->  normalize  ->  validate + checklist   (=> PipelineResult)
-       |                                   |
-       |                      (reviewer edits, then per product:)
-       |                                   v
-       |                     enrich  ->  images  ->  shop.create_product
-       |
-    document extraction: a supplier PDF / image via a `DocumentExtractionProvider`
-    (production: a supplier-specific LLM prompt; demo: `MockDocumentExtractor`).
-    A structured-file `SupplierAdapter` (JSON / CSV / HTML) is the alternative,
-    developer-facing entry point.
-
-The ingest half is pure and side-effect free, which makes it trivial to test and
-to expose as one endpoint.
-"""
-
 from __future__ import annotations
 
 from app.domain.models import (
@@ -34,14 +15,13 @@ from app.services.validation import validate
 from app.suppliers.base import SupplierAdapter
 
 
+#validate a product and build its checklist
 def review(product: NormalizedProduct) -> ReviewProduct:
-    """Validate a product and build its completion checklist."""
     return ReviewProduct(
         product=product,
         issues=validate(product),
         checklist=build_checklist(product),
     )
-
 
 def _result(
     *,
@@ -75,7 +55,6 @@ def ingest_document(
     filename: str,
     pricing: PricingPolicy = DEFAULT_PRICING,
 ) -> PipelineResult:
-    """Primary entry point: extract raw products from a supplier document."""
     raw_products = extractor.extract(
         supplier_id=supplier_id, document=document, media_type=media_type
     )
@@ -97,7 +76,7 @@ def ingest_document(
         source_document=source_document,
     )
 
-
+#Developer entry point
 def ingest(
     adapter: SupplierAdapter,
     payload: bytes,
@@ -105,7 +84,6 @@ def ingest(
     source_reference: str | None = None,
     pricing: PricingPolicy = DEFAULT_PRICING,
 ) -> PipelineResult:
-    """Developer-facing entry point: parse a structured file (JSON / CSV / HTML)."""
     return _result(
         supplier_id=adapter.id,
         supplier_name=adapter.name,
@@ -113,8 +91,3 @@ def ingest(
         pricing=pricing,
         source_reference=source_reference,
     )
-
-
-# backwards-compatible alias
-def revalidate(product: NormalizedProduct) -> ReviewProduct:
-    return review(product)
