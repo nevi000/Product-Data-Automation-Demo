@@ -1,18 +1,8 @@
-"""Product completeness.
-
-`validate()` answers "is this data correct?". This module answers a different
-question — "is this product ready to publish?" — as a checklist the UI shows as
-completion rather than as errors.
-
-Required items block export; recommended items are shown but do not block.
-"""
-
 from __future__ import annotations
 
 from app.domain.models import ChecklistItem, NormalizedProduct
 
 _MIN_DESCRIPTION_CHARS = 20
-
 
 def build_checklist(p: NormalizedProduct) -> list[ChecklistItem]:
     basics_done = bool(
@@ -24,7 +14,7 @@ def build_checklist(p: NormalizedProduct) -> list[ChecklistItem]:
     if p.has_sizes:
         variants_done = any(v.active for v in p.variants)
     else:
-        # a genuinely size-less product (e.g. an accessory) is fine as-is
+        #a product without sizes is already good to go
         variants_done = True
 
     description_done = bool(
