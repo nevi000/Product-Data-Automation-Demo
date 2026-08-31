@@ -1,13 +1,3 @@
-"""Validation: NormalizedProduct -> list[ValidationIssue].
-
-This stage checks whether the data is *correct*, not whether the product is
-*finished* — "you still need to pick a category" is product completion
-(`services/completeness.py`), not a validation error.
-
-Rules are small, named and independent. `ERROR` blocks export; `WARNING` is
-advisory. On freshly imported, well-formed supplier data this returns `[]`.
-"""
-
 from __future__ import annotations
 
 from collections.abc import Callable, Iterable
@@ -15,13 +5,10 @@ from collections.abc import Callable, Iterable
 from app.domain.models import NormalizedProduct, Severity, ValidationIssue
 
 Rule = Callable[[NormalizedProduct], Iterable[ValidationIssue]]
-
 _EAN_LENGTHS = {8, 12, 13, 14}
-
 
 def _issue(field: str, sev: Severity, code: str, msg: str) -> ValidationIssue:
     return ValidationIssue(field=field, severity=sev, code=code, message=msg)
-
 
 def rule_name(p: NormalizedProduct):
     if not p.name or not p.name.strip():
@@ -30,12 +17,10 @@ def rule_name(p: NormalizedProduct):
         yield _issue("name", Severity.WARNING, "name.too_long",
                      "Product name is longer than 120 characters.")
 
-
 def rule_product_number(p: NormalizedProduct):
     if not p.product_number or p.product_number == "item":
         yield _issue("product_number", Severity.ERROR, "product_number.missing",
                      "Could not derive a product number from the supplier data.")
-
 
 def rule_price(p: NormalizedProduct):
     if p.retail_price is None:
@@ -46,13 +31,11 @@ def rule_price(p: NormalizedProduct):
         yield _issue("retail_price", Severity.WARNING, "price.margin",
                      "Retail price is not above purchase price.")
 
-
 def rule_duplicate_sizes(p: NormalizedProduct):
     dupes = sorted(_dups(v.size for v in p.variants))
     if dupes:
         yield _issue("variants", Severity.ERROR, "variants.duplicate_size",
                      f"Duplicate sizes: {', '.join(dupes)}.")
-
 
 def rule_eans(p: NormalizedProduct):
     for v in p.variants:
@@ -63,7 +46,6 @@ def rule_eans(p: NormalizedProduct):
         yield _issue("ean", Severity.WARNING, "ean.format",
                      f"EAN {p.ean!r} is not a plausible barcode.")
 
-
 DEFAULT_RULES: list[Rule] = [
     rule_name,
     rule_product_number,
@@ -71,7 +53,6 @@ DEFAULT_RULES: list[Rule] = [
     rule_duplicate_sizes,
     rule_eans,
 ]
-
 
 def validate(
     product: NormalizedProduct, *, rules: list[Rule] = DEFAULT_RULES
@@ -81,15 +62,13 @@ def validate(
         issues.extend(rule(product))
     return issues
 
-
-# helpers ---------------------------------------------------------------------
-
 def _valid_ean(value: str) -> bool:
+    #shape check only -> doesn't verify the EAN check digit
     return value.isdigit() and len(value) in _EAN_LENGTHS
 
-
-def _dups(items):
-    seen, out = set(), set()
+def _dups(items: Iterable[str]) -> set[str]:
+    seen: set[str] = set()
+    out: set[str] = set()
     for it in items:
         if it in seen:
             out.add(it)
