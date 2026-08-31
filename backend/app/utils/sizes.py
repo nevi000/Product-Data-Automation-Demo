@@ -4,8 +4,7 @@ Suppliers list sizes inconsistently (a full run "34-46", a subset, or none at
 all). The UI lets a reviewer pick a product type — which implies a size preset —
 and a from/to range; this module resolves that to an ordered list.
 
-Ported from the original `size_parser.py`; the presets, product types and size
-charts here are generic apparel/footwear concepts, not any real catalogue.
+The presets, product types and size charts are generic apparel/footwear concepts.
 """
 
 from __future__ import annotations
