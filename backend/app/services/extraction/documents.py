@@ -1,11 +1,3 @@
-"""The bundled fictional demo documents and their canonical extraction results.
-
-Everything here is invented. The `products` list on each `DemoDocument` is the
-single source of truth: `MockDocumentExtractor` returns it, and
-`scripts/generate_demo_documents.py` renders it into the PDF / image file so the
-document a recruiter opens always matches what the demo "extracts" from it.
-"""
-
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -17,15 +9,12 @@ from app.domain.models import Money
 
 DOCUMENTS_DIR = settings.demo_data_dir / "documents"
 
-
 def _eur(amount: str) -> Money:
     return Money(amount=Decimal(amount), currency="EUR")
 
-
 @dataclass
 class DemoLine:
-    """One order line, as a supplier-specific LLM would extract it."""
-
+    #one order line, as a supplier-specific LLM would extract it
     position: int
     source_reference: str | None
     model_name: str
@@ -39,14 +28,13 @@ class DemoLine:
     purchase_price: Money | None = None
     suggested_retail_price: Money | None = None
 
-
 @dataclass
 class DemoDocument:
     supplier_id: str
     supplier_name: str
     filename: str
     media_type: str
-    kind: str                      # "Order confirmation" / "Delivery note" / "Order"
+    kind: str
     doc_number: str
     doc_date: str
     lines: list[DemoLine]
@@ -59,7 +47,7 @@ class DemoDocument:
     def product_count(self) -> int:
         return len(self.lines)
 
-
+#invented demo data for the mock document extractor
 DEMO_DOCUMENTS: dict[str, DemoDocument] = {
     "alpinewear": DemoDocument(
         supplier_id="alpinewear",
