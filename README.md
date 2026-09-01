@@ -157,14 +157,14 @@ components in `src/components/ui.jsx`.
 
 | Decision | Why |
 |---|---|
-| Extraction behind `DocumentExtractionProvider` | The demo runs offline; a real supplier-prompt provider drops in unchanged |
-| Bundled documents rendered from the fixtures | The PDF someone opens always matches what the demo "extracts" — one source of truth |
-| One `NormalizedProduct` after extraction | The decision that lets the system scale to many suppliers |
-| Supplier registry instead of call-site conditionals | Adding a supplier is additive; nothing downstream changes |
-| Validation split from completion | "Wrong data" and "not finished yet" are different questions with different UX |
-| `Money` as a model, not a float | Amount and currency travel together; rounding is explicit |
-| Staged image jobs + injectable job store | Survives a multi-worker deployment without a message broker |
-| Errors mapped to HTTP status in one place | Handlers raise domain errors and stay readable |
+| `DocumentExtractionProvider` as an extraction boundary | Keeps document extraction independent of the concrete LLM or demo implementation |
+| Demo documents generated from shared fixtures | The bundled PDF / image always matches the data returned by the mock extractor |
+| One `NormalizedProduct` after normalization | Gives the rest of the application a single supplier-independent product model |
+| Supplier registry instead of call-site conditionals | New structured suppliers can be added without changing the downstream pipeline |
+| Validation separated from completion | Invalid data and unfinished data are different problems and should be handled differently in the UI |
+| `Money` as a value object | Keeps amount and currency together and makes rounding explicit |
+| Staged image jobs with an injectable job store | Supports asynchronous image processing and can be adapted to multi-worker deployments |
+| Centralized domain-to-HTTP error mapping | Keeps API handlers small and prevents transport concerns from leaking into the domain logic |
 
 ## Run it
 
