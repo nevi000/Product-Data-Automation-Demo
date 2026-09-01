@@ -15,7 +15,7 @@ extractor = MockDocumentExtractor()
 def test_get_extractor_returns_the_mock():
     assert get_extractor("mock").name == "mock"
     with pytest.raises(ValueError):
-        get_extractor("gemini")
+        get_extractor("does-not-exist")
 
 
 def test_bundled_documents_exist_and_match_fixture_counts():
