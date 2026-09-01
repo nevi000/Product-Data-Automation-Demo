@@ -1,18 +1,3 @@
-"""In-memory shop adapter.
-
-Stands in for the Shopware Admin API client. It keeps the parts of that client
-that are actually interesting engineering:
-
-* a **payload builder** that assembles a parent product + size variants +
-  configurator settings + properties + prices in one place,
-* **idempotent** "get or create" for property options,
-* a **taxonomy** (categories + property groups) so enrichment and the reviewer
-  have something real to choose from.
-
-It does *not* talk to any network and has no credentials. The category tree and
-property options below are invented for a fictional outdoor / apparel retailer.
-"""
-
 from __future__ import annotations
 
 import uuid
@@ -22,7 +7,6 @@ from app.services.shop.base import ShopClient, ShopProduct, ShopWriteError
 
 _BASE_URL = "https://demo-shop.local/admin"
 
-# Flat "A / B / C" paths; the frontend builds the expandable tree from them.
 _CATEGORIES = [
     "Home / Women / Outerwear / Insulated Jackets",
     "Home / Women / Outerwear / Shell Jackets",
@@ -47,8 +31,6 @@ _CATEGORIES = [
     "Home / Home & Travel / Drinkware",
 ]
 
-# Single-select property groups (the reviewer picks at most one option per group).
-# "Material" and "Care" are handled as dedicated free-text fields, not here.
 _PROPERTY_OPTIONS = {
     "Color": [
         "Black", "Navy", "Slate Grey", "Charcoal", "Forest Green", "Rust",
@@ -60,21 +42,16 @@ _PROPERTY_OPTIONS = {
     "Neckline": ["Crew", "V-neck", "Half-zip", "Full-zip", "Hooded"],
 }
 
-
 def _new_id() -> str:
     return uuid.uuid4().hex
 
-
 class MockShopAdapter(ShopClient):
     def __init__(self) -> None:
-        # group -> {value_lower -> option_id}
         self._options: dict[str, dict[str, str]] = {
             g: {v.lower(): _new_id() for v in vals}
             for g, vals in _PROPERTY_OPTIONS.items()
         }
         self._products: dict[str, ShopProduct] = {}
-
-    # reads ------------------------------------------------------------------
 
     def list_category_paths(self) -> list[str]:
         return list(_CATEGORIES)
@@ -84,8 +61,6 @@ class MockShopAdapter(ShopClient):
 
     def get_product(self, product_number: str) -> ShopProduct | None:
         return self._products.get(product_number)
-
-    # writes ---------------------------------------------------------------
 
     def upsert_property_option(self, group: str, value: str) -> str:
         bucket = self._options.setdefault(group, {})
@@ -121,22 +96,13 @@ class MockShopAdapter(ShopClient):
         self._products[product.product_number] = shop_product
         return shop_product
 
-    # payload builder ----------------------------------------------------
-
     def _build_payload(self, product: NormalizedProduct) -> dict:
-        """Assemble the full write payload — parent + variants + properties.
-
-        Mirrors `ShopwareClient.build_product_payload` in shape: one parent, one
-        child per active size, configurator settings referencing the resolved
-        size options, defaults of stock=0 / active=False.
-        """
         parent_id = _new_id()
 
         size_option_ids = {
             v.size: self.upsert_property_option("Size", v.size)
             for v in product.active_variants
         }
-
         children = [
             {
                 "id": _new_id(),
