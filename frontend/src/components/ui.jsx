@@ -1,10 +1,6 @@
-/**
- * UI kit — "precise operations console".
- * Warm paper canvas, near-black ink, one deep ink-blue accent. Structure comes
- * from a 3-tier surface system + spacing rhythm, not colour.
- */
+// Shared UI components.
 
-/* =========================================================== icons ======= */
+// icons
 
 const PATHS = {
   document:
@@ -52,7 +48,7 @@ export function Icon({ name, className = 'h-4 w-4', strokeWidth = 1.75 }) {
   )
 }
 
-/* ========================================================= surfaces ====== */
+// surfaces
 
 export function Panel({ className = '', elevated = false, ...props }) {
   return (
@@ -65,11 +61,7 @@ export function Panel({ className = '', elevated = false, ...props }) {
   )
 }
 
-/**
- * A flat section meant to sit inside one shared workspace surface — separated
- * from its siblings by a divider, not its own card border. Title is a compact
- * tracked label with a rule under the header.
- */
+// one section inside the editor surface, separated by a divider instead of its own border
 export function SectionCard({ id, icon, title, description, action, highlighted = false, children }) {
   return (
     <section
@@ -93,7 +85,7 @@ export function SectionCard({ id, icon, title, description, action, highlighted 
   )
 }
 
-/* ========================================================== buttons ===== */
+// buttons
 
 const BTN_BASE =
   'inline-flex select-none items-center justify-center gap-1.5 rounded-md font-medium transition-[background-color,box-shadow,transform,border-color] duration-[var(--dur)] disabled:cursor-not-allowed active:translate-y-px focus-visible:outline-none'
@@ -137,7 +129,7 @@ export function IconButton({ label, className = '', children, ...props }) {
   )
 }
 
-/* =========================================================== fields ===== */
+// fields
 
 export function Field({
   label,
@@ -236,7 +228,7 @@ export function PriceInput({ value, onChange, currency = 'EUR', disabled, id }) 
   )
 }
 
-/* ============================================================ chips ===== */
+// chips
 
 export function ChipToggle({ selected, disabled, onClick, children }) {
   return (
@@ -275,7 +267,7 @@ export function RemovableChip({ children, onRemove, disabled }) {
   )
 }
 
-/* ============================================================ stats ===== */
+// stats
 
 export function Stat({ label, value, icon }) {
   return (
@@ -289,7 +281,7 @@ export function Stat({ label, value, icon }) {
   )
 }
 
-/* ========================================================= statuses ===== */
+// status badges
 
 const BADGE_TONE = {
   neutral: 'border border-hairline bg-surface-inset text-ink-soft',
@@ -317,7 +309,7 @@ export function StatusBadge({ tone = 'neutral', dot = false, children }) {
   )
 }
 
-/* =========================================================== motion ===== */
+// spinner / skeleton / overlay
 
 export function Spinner({ className = 'h-4 w-4' }) {
   return (
@@ -336,7 +328,7 @@ export function Skeleton({ className = '' }) {
   return <div className={`skeleton rounded-md ${className}`} />
 }
 
-/** Centered modal surface with a fade-scale entrance. */
+// centered modal
 export function Overlay({ children, labelledBy }) {
   return (
     <div className="fixed inset-0 z-50 grid animate-fade-in place-items-center bg-ink/45 p-4 backdrop-blur-[3px]">
@@ -370,7 +362,7 @@ export function CodeBlock({ children, className = '' }) {
   )
 }
 
-/* ========================================================== stepper ===== */
+// stepper
 
 export function Stepper({ steps, currentIndex }) {
   return (
@@ -417,7 +409,7 @@ export function Stepper({ steps, currentIndex }) {
   )
 }
 
-/* ==================================================== completion list == */
+// completion list
 
 export function CompletionList({ items, onJump }) {
   const required = items.filter((i) => i.required)
@@ -483,7 +475,7 @@ export function CompletionList({ items, onJump }) {
   )
 }
 
-/* =============================================================== misc === */
+// misc
 
 export function money(m) {
   if (!m) return '—'

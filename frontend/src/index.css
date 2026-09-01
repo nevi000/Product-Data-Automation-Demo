@@ -31,13 +31,13 @@ h3 {
   font-feature-settings: 'ss01' 1;
 }
 
-/* tabular figures for anything numeric (SKUs, prices, counts) */
+/* tabular figures for numbers (SKUs, prices, counts) */
 .tabular {
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum' 1;
 }
 
-/* one consistent, visible keyboard focus */
+/* visible keyboard focus everywhere */
 :where(button, a, input, select, textarea, [role='switch'], [tabindex]):focus-visible {
   outline: none;
   box-shadow: 0 0 0 2px theme('colors.canvas'), 0 0 0 4px theme('colors.primary.DEFAULT');
@@ -64,7 +64,7 @@ h3 {
   }
 }
 
-/* animated disclosure (grid-rows trick, no JS height measurement) */
+/* animated open/close without measuring height in JS */
 .disclosure {
   display: grid;
   grid-template-rows: 0fr;
@@ -77,7 +77,7 @@ h3 {
   overflow: hidden;
 }
 
-/* thin, unobtrusive scrollbars inside panels */
+/* thin scrollbars inside panels */
 .scroll-slim {
   scrollbar-width: thin;
   scrollbar-color: theme('colors.hairline.strong') transparent;

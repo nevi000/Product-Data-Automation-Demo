@@ -47,7 +47,7 @@ export default function GeneralSection({
       highlighted={highlighted}
     >
       <div className="space-y-7">
-        {/* primary identity + copy */}
+        {/* name + description */}
         <div className="space-y-5">
           <Field label="Product name" htmlFor="f-name">
             <TextInput
@@ -107,7 +107,7 @@ export default function GeneralSection({
           </div>
         </div>
 
-        {/* supporting identity */}
+        {/* sku, brand, prices, size chart */}
         <div className="grid gap-5 border-t border-hairline pt-6 sm:grid-cols-2">
           <Field label="SKU / article number" htmlFor="f-sku">
             <TextInput

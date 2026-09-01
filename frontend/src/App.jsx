@@ -16,7 +16,7 @@ function Wordmark() {
   return (
     <div className="flex items-center gap-2.5">
       <span className="grid h-7 w-7 place-items-center rounded-md bg-primary text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]">
-        {/* raw lines → structured record */}
+        {/* logo */}
         <svg
           className="h-[18px] w-[18px]"
           viewBox="0 0 20 20"
@@ -42,7 +42,7 @@ function Wordmark() {
   )
 }
 
-/** Wizard: import → review → editor → done. */
+// wizard: import -> review -> editor -> done
 export default function App() {
   const [step, setStep] = useState('import')
   const [ingestResult, setIngestResult] = useState(null)

@@ -4,10 +4,9 @@ export default {
   theme: {
     extend: {
       spacing: {
-        // shared chrome dimensions — keep the sticky header, scroll anchors and
-        // the sticky inspector on one source of truth
-        header: '3.5rem', // matches the App header height (h-14)
-        sticky: '4.5rem', // header + 16px breathing room
+        // header height and the offset used for sticky elements + scroll anchors
+        header: '3.5rem', // = App header (h-14)
+        sticky: '4.5rem', // header + 16px
       },
       colors: {
         canvas: '#F7F6F2',

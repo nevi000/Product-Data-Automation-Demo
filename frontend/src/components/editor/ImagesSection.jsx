@@ -8,7 +8,7 @@ const KINDS = [
   { id: 'packshot', label: 'Packshot' },
 ]
 
-// 1x1 transparent PNG — stands in for "the raw supplier photo" the pipeline edits.
+// 1x1 transparent PNG, used as the fake "source photo" we send to the image job
 const PIXEL =
   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
 

@@ -8,7 +8,7 @@ function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms))
 }
 
-/** Centered "analyzing…" modal shown while the (mock) extractor runs. */
+// "analyzing" modal shown while the mock extractor runs
 function AnalyzingOverlay({ doc, step, count }) {
   const done = count != null
   return (
@@ -73,8 +73,7 @@ function AnalyzingOverlay({ doc, step, count }) {
   )
 }
 
-/** A small, fully abstract stylised preview — signals the source format without
- *  reproducing any real document. Pure UI shapes. */
+// small abstract preview that just hints at the file type
 function DocPreview({ doc }) {
   const isPdf = doc.media_type === 'application/pdf'
   const rows = Array.from({ length: Math.min(4, Math.max(3, doc.product_count)) })

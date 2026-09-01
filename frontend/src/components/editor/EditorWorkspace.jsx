@@ -92,7 +92,7 @@ export default function EditorWorkspace({ items, supplierName, onBack, onDone })
             : f,
         )
       } catch {
-        /* keep last review on a transient error */
+        // keep the last review if this one fails
       }
     },
     [setForm],
@@ -192,7 +192,7 @@ export default function EditorWorkspace({ items, supplierName, onBack, onDone })
         </div>
       </div>
 
-      {/* product workspace navigator — a connected segmented strip */}
+      {/* product tabs */}
       <div className="scroll-slim -mx-1 flex overflow-x-auto px-1 pb-1">
         <div className="flex rounded-lg border border-hairline bg-surface">
           {forms.map((f, i) => {

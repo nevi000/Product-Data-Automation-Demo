@@ -64,7 +64,7 @@ function SourceVsNormalized({ raw, product }) {
           </dl>
         </div>
 
-        {/* signature transformation indicator */}
+        {/* normalize() step between the two columns */}
         <div className="flex shrink-0 items-center justify-center gap-2 lg:flex-col lg:gap-0 lg:px-1">
           <span className="hidden w-px flex-1 bg-gradient-to-b from-transparent to-hairline-strong lg:block" />
           <span className="flex items-center gap-1.5 rounded-full border border-primary-border bg-surface px-2.5 py-1.5 lg:my-2.5">
