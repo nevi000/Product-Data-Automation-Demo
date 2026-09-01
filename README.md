@@ -168,26 +168,56 @@ components in `src/components/ui.jsx`.
 
 ## Run it
 
-Python 3.11+ and Node 18+. Nothing to configure — every provider is mocked.
+The demo runs entirely offline. No API keys, credentials, or external services
+are required.
+
+### Backend
+
+Requires Python 3.11+.
 
 ```bash
 cd backend
-python -m venv .venv && . .venv/Scripts/activate    # macOS/Linux: source .venv/bin/activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000            # API + docs at :8000/docs
-
-cd ../frontend
-npm install && npm run dev                           # :5173
+python -m venv .venv
 ```
 
-If port 8000 is taken: `uvicorn app.main:app --port 8001` and
-`VITE_API_PROXY=http://localhost:8001 npm run dev`.
+Activate the environment:
 
-Then pick a supplier document on the import screen, click **Analyze sample
-document**, review the extracted vs. normalized data, edit the products, and
-export. Structured feeds (JSON / CSV / HTML) go through *Developer tools* on the
-same screen.
+```bash
+# macOS / Linux
+source .venv/bin/activate
 
+# Windows PowerShell
+.venv\Scripts\Activate.ps1
+```
+
+Then start the API:
+
+```bash
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8000
+```
+
+The API is available at `http://localhost:8000`, with interactive documentation
+at `http://localhost:8000/docs`.
+
+### Frontend
+
+Requires Node.js 18+.
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Open `http://localhost:5173`.
+
+Choose one of the bundled fictional supplier documents and click **Extract
+products**. From there, the demo walks through extraction, normalization, review,
+editing and enrichment, and finally shop export.
+
+Structured JSON, CSV, and HTML inputs are also available through **Developer
+tools** on the import screen.
 ## Tests
 
 ```bash
@@ -203,17 +233,24 @@ idempotency, the image pipeline, and the HTTP API end to end.
 
 ## My contribution
 
-In the production system I built the supplier registry and the extraction
-architecture behind it, the normalized product model and the normalization /
-validation stages, the FastAPI backend (routing, request models, the
-provider-agnostic LLM layer, the Shopware Admin API client with its idempotent
-taxonomy writes and payload builder, and the staged image pipeline with its job
-store), the React review frontend, and the test suite.
+I developed the production system as part of my work on product-data automation.
+My work included the supplier extraction and normalization pipeline, the canonical
+product model, validation, the FastAPI backend, provider-agnostic LLM integration,
+the Shopware Admin API integration, staged image processing, the React-based
+review workflow, and automated tests.
 
-This repository is my reimplementation of that architecture. Two things differ
-from production and are marked as such in the UI: the primary extractor is a mock
-(production uses a hosted LLM with a per-supplier prompt, not included here), and
-the structured-file adapters are a demo-only entry point.
+This repository is a separate public reimplementation of that system's core
+workflow and engineering ideas. Proprietary integrations and business-specific
+logic have been replaced with fictional data and deterministic offline
+implementations.
+
+The production system uses supplier-specific LLM extraction, external image
+generation, cloud storage, and the Shopware Admin API. In this repository those
+boundaries are represented by mock providers so the full workflow can be explored
+without credentials or access to internal systems.
+
+The structured JSON, CSV, and HTML `SupplierAdapter`s are an additional
+developer-facing demo path included specifically in this public version.
 
 ## Repository layout
 
