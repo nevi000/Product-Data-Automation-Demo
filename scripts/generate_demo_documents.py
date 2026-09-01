@@ -1,16 +1,3 @@
-"""Regenerate the bundled fictional demo documents.
-
-    python scripts/generate_demo_documents.py
-
-Reads the canonical extraction fixtures from
-`app/services/extraction/documents.py` and renders each one into a file under
-`demo_data/documents/`. The PDFs are written with a tiny hand-rolled PDF writer
-(no dependency). The `.jpg` needs Pillow — only to *regenerate* the asset; the
-committed file has no runtime dependency.
-
-Everything rendered here is invented. No employer data, prompts or layouts.
-"""
-
 from __future__ import annotations
 
 import sys
@@ -25,10 +12,8 @@ from app.services.extraction.documents import (
     DemoDocument,
 )
 
-# --------------------------------------------------------------- layout model
 
 def _lines(doc: DemoDocument) -> list[tuple[str, str]]:
-    """(style, text) rows, top to bottom. style in {h1, meta, rule, h2, kv, note}."""
     rows: list[tuple[str, str]] = [
         ("h1", f"{doc.supplier_name} - {doc.kind}"),
         ("meta", f"Document {doc.doc_number}    Date {doc.doc_date}"),
@@ -63,12 +48,8 @@ def _lines(doc: DemoDocument) -> list[tuple[str, str]]:
     rows.append(("note", f"{doc.product_count} line items - end of document"))
     return rows
 
-
-# ------------------------------------------------------------------- pdf writer
-
 def _esc(text: str) -> str:
     return text.replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)")
-
 
 def _content_stream(rows: list[tuple[str, str]]) -> str:
     styles = {  # font, size, leading
@@ -132,9 +113,6 @@ def build_pdf(rows: list[tuple[str, str]]) -> bytes:
     )
     return bytes(buf)
 
-
-# ------------------------------------------------------------------- jpg writer
-
 def build_jpg(rows: list[tuple[str, str]]) -> bytes:
     from PIL import Image, ImageDraw, ImageFont
 
@@ -185,9 +163,6 @@ def build_jpg(rows: list[tuple[str, str]]) -> bytes:
     img.save(out, format="JPEG", quality=86)
     return out.getvalue()
 
-
-# ------------------------------------------------------------------------ main
-
 def main() -> None:
     DOCUMENTS_DIR.mkdir(parents=True, exist_ok=True)
     for demo in DEMO_DOCUMENTS.values():
@@ -200,7 +175,6 @@ def main() -> None:
             raise SystemExit(f"unsupported media type: {demo.media_type}")
         demo.path.write_bytes(data)
         print(f"wrote {demo.path.relative_to(DOCUMENTS_DIR.parent.parent)} ({len(data)} bytes)")
-
-
 if __name__ == "__main__":
     main()
+
