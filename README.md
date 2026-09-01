@@ -1,22 +1,32 @@
 # Product Data Automation Platform
 
-Public portfolio version of an e-commerce product-onboarding platform I built at
-work. Same architecture, rebuilt with fictional suppliers and offline mock
-integrations so it runs with no credentials and no network. No employer code,
-supplier data, extraction prompts, or credentials are included — every supplier,
-price and business rule here is invented.
+A full-stack product-onboarding platform that automates the path from supplier
+documents to shop-ready products.
+
+The production system I developed supports **20+ supplier-specific workflows**
+and combines AI-assisted document extraction, product-data normalization,
+human review, content and image enrichment, and Shopware integration in one
+workflow.
+
+This repository is a public portfolio reimplementation of the core architecture
+and workflow using fictional suppliers and offline providers.
+Employer code, supplier data, prompts, credentials, and business
+rules are not included.
 
 ## The problem
 
-An e-commerce team receives product data from around 20 suppliers, each in its
-own format: a JSON feed, a CSV export, an HTML catalogue page, a PDF order
-confirmation. Onboarding a product means repeating the same manual work every
-time — pull out the products and variants, reconcile inconsistent article
-numbers, colour codes, size runs and EANs, normalize to the shop's product
-model, write a description, choose categories, prepare images, catch bad data,
-and create the product through the shop's admin API.
+Product onboarding was highly manual: supplier documents arrived in different
+formats, with inconsistent article numbers, colours, sizes, EANs, pricing, and
+product metadata.
 
-The platform turns that into one pipeline with a human review step in the middle.
+Each product had to be extracted, normalized, reviewed, enriched with content
+and images, and finally created in Shopware.
+
+With **20+ supplier-specific workflows**, this process became difficult to scale
+and easy to get wrong.
+
+The platform turns that fragmented workflow into one structured pipeline with a
+human review and editing step before products are published.
 
 ## Pipeline
 
