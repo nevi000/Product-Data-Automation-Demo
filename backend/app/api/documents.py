@@ -1,11 +1,3 @@
-"""Document-extraction endpoints — the primary demo entry point.
-
-`GET  /api/documents`                     list the bundled fictional documents
-`GET  /api/documents/{id}/file`           download / preview one document
-`POST /api/documents/{id}/analyze`        run extraction on the bundled document
-`POST /api/documents/{id}/extract`        run extraction on an uploaded document
-"""
-
 from __future__ import annotations
 
 from fastapi import APIRouter, File, HTTPException, UploadFile
@@ -19,7 +11,6 @@ from app.services.pipeline import ingest_document
 router = APIRouter()
 
 _MAX_UPLOAD_BYTES = 8 * 1024 * 1024
-
 
 @router.get("/documents")
 def list_documents() -> list[dict]:
@@ -37,14 +28,12 @@ def list_documents() -> list[dict]:
         for d in sorted(DEMO_DOCUMENTS.values(), key=lambda d: d.supplier_name.lower())
     ]
 
-
 @router.get("/documents/{supplier_id}/file")
 def document_file(supplier_id: str) -> FileResponse:
     demo = DEMO_DOCUMENTS.get(supplier_id.lower())
     if demo is None or not demo.path.exists():
         raise HTTPException(status_code=404, detail=f"No document for {supplier_id!r}.")
     return FileResponse(demo.path, media_type=demo.media_type, filename=demo.filename)
-
 
 def _analyze(supplier_id: str, document: bytes, media_type: str) -> PipelineResult:
     demo = DEMO_DOCUMENTS.get(supplier_id.lower())
@@ -62,14 +51,12 @@ def _analyze(supplier_id: str, document: bytes, media_type: str) -> PipelineResu
         raise HTTPException(status_code=422, detail="No products extracted from the document.")
     return result
 
-
 @router.post("/documents/{supplier_id}/analyze", response_model=PipelineResult)
 def analyze_bundled(supplier_id: str) -> PipelineResult:
     demo = DEMO_DOCUMENTS.get(supplier_id.lower())
     if demo is None or not demo.path.exists():
         raise HTTPException(status_code=404, detail=f"No document for {supplier_id!r}.")
     return _analyze(supplier_id, demo.path.read_bytes(), demo.media_type)
-
 
 @router.post("/documents/{supplier_id}/extract", response_model=PipelineResult)
 async def extract_uploaded(

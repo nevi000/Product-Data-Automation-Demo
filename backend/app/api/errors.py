@@ -1,9 +1,3 @@
-"""Edge error mapping.
-
-Internal typed errors are translated to HTTP status codes in exactly one place,
-so handlers can raise domain errors and stay readable.
-"""
-
 from __future__ import annotations
 
 from fastapi import Request

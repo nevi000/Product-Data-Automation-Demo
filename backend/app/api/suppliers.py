@@ -1,5 +1,3 @@
-"""Supplier + ingest endpoints."""
-
 from __future__ import annotations
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
@@ -20,7 +18,6 @@ _SAMPLE_FILES = {
     "demoshoes": "demoshoes_catalog.html",
 }
 
-
 def _sample_count(supplier_id: str) -> int | None:
     name = _SAMPLE_FILES.get(supplier_id)
     if name is None:
@@ -31,7 +28,6 @@ def _sample_count(supplier_id: str) -> int | None:
         return ingest(adapter, payload).count
     except Exception:
         return None
-
 
 @router.get("/suppliers")
 def list_suppliers() -> list[dict]:
@@ -46,7 +42,6 @@ def list_suppliers() -> list[dict]:
         for m in registry.list()
     ]
 
-
 @router.get("/suppliers/{supplier_id}/sample", response_class=PlainTextResponse)
 def sample_document(supplier_id: str) -> str:
     """Return the bundled demo feed for a supplier, so the UI has a one-click demo."""
@@ -54,7 +49,6 @@ def sample_document(supplier_id: str) -> str:
     if name is None:
         raise HTTPException(status_code=404, detail=f"No sample for {supplier_id!r}.")
     return (settings.demo_data_dir / name).read_text(encoding="utf-8")
-
 
 @router.post("/suppliers/{supplier_id}/ingest", response_model=PipelineResult)
 async def ingest_document(
