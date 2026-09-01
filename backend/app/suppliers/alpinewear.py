@@ -1,13 +1,3 @@
-"""AlpineWear — JSON API feed.
-
-Cleanest of the three sources: a well-formed JSON array where each element is one
-colourway with a nested size/EAN map. The adapter still has to cope with:
-
-* prices given as strings with a currency suffix,
-* a ``status`` field where anything but ``"active"`` must be skipped,
-* sizes present as an object (size -> {ean, ...}) rather than a list.
-"""
-
 from __future__ import annotations
 
 import json
@@ -17,7 +7,6 @@ from app.domain.models import Money, RawSupplierProduct
 from app.suppliers.base import SupplierAdapter, SupplierMeta, SupplierParseError
 
 _CURRENCY_SUFFIX = {"EUR": "EUR", "€": "EUR", "CHF": "CHF", "USD": "USD", "$": "USD"}
-
 
 def _money(value) -> Money | None:
     if value in (None, "", 0):
@@ -36,7 +25,6 @@ def _money(value) -> Money | None:
         return Money(amount=Decimal(text), currency=currency)
     except (InvalidOperation, ValueError):
         return None
-
 
 class AlpineWearAdapter(SupplierAdapter):
     meta = SupplierMeta(
@@ -71,10 +59,9 @@ class AlpineWearAdapter(SupplierAdapter):
                     for s, v in sizes_field.items()
                     if isinstance(v, dict) and v.get("ean")
                 }
-            else:  # a bare list of sizes
+            else:
                 sizes = [str(s) for s in sizes_field]
                 ean_by_size = {}
-
             out.append(
                 RawSupplierProduct(
                     supplier_id=self.id,

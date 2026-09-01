@@ -1,17 +1,3 @@
-"""DemoShoes — HTML catalogue page (scraper-like).
-
-The supplier has no feed; the only machine-readable source is their B2B
-catalogue page. The adapter parses an HTML table where:
-
-* the product spans a header row (article, model, colour, price) plus a
-  following row of ``<td>`` size cells,
-* size cells carry the EAN in a ``data-ean`` attribute,
-* struck-through / ``class="sold-out"`` size cells must be skipped,
-* prices look like ``"€ 59,90"``.
-
-Uses only the stdlib ``html.parser`` — no bs4 — to keep dependencies minimal.
-"""
-
 from __future__ import annotations
 
 from decimal import Decimal, InvalidOperation
@@ -30,7 +16,6 @@ def _money(value: str | None) -> Money | None:
         return Money(amount=Decimal(clean_number(text)))
     except (InvalidOperation, ValueError):
         return None
-
 
 class _CatalogueParser(HTMLParser):
     def __init__(self) -> None:
@@ -83,7 +68,6 @@ class _CatalogueParser(HTMLParser):
                 }
                 self.rows.append(self._current)
             self._in_product_row = self._in_size_row = False
-
 
 class DemoShoesAdapter(SupplierAdapter):
     meta = SupplierMeta(

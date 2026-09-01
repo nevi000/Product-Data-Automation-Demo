@@ -1,14 +1,3 @@
-"""UrbanThreads — CSV export.
-
-One physical row per size, so multiple rows must be *grouped* back into one
-product (by article number + colour). This is the messiest real-world case:
-
-* semicolon-delimited, European decimal commas,
-* a shipping/handling pseudo-line ("SHIPPING") that is not a product,
-* quantity 0 rows that should be dropped,
-* colour split across ``color_code`` / ``color_name`` columns.
-"""
-
 from __future__ import annotations
 
 import csv
@@ -22,7 +11,6 @@ from app.utils.text import clean_number
 
 _SKIP_ARTICLES = {"SHIPPING", "HANDLING", "FREIGHT"}
 
-
 def _money(value: str | None) -> Money | None:
     if not value:
         return None
@@ -33,7 +21,6 @@ def _money(value: str | None) -> Money | None:
     if amount <= 0:
         return None
     return Money(amount=amount)
-
 
 class UrbanThreadsAdapter(SupplierAdapter):
     meta = SupplierMeta(
