@@ -44,7 +44,6 @@ def list_suppliers() -> list[dict]:
 
 @router.get("/suppliers/{supplier_id}/sample", response_class=PlainTextResponse)
 def sample_document(supplier_id: str) -> str:
-    """Return the bundled demo feed for a supplier, so the UI has a one-click demo."""
     name = _SAMPLE_FILES.get(supplier_id.lower())
     if name is None:
         raise HTTPException(status_code=404, detail=f"No sample for {supplier_id!r}.")
