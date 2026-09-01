@@ -30,18 +30,26 @@ human review and editing step before products are published.
 
 ## Pipeline
 
-```
-supplier PDF / photo
-  → extract      DocumentExtractionProvider — a supplier-specific LLM prompt in
-                 production; a deterministic mock over bundled documents here
-  → normalize    → one NormalizedProduct, supplier-agnostic
-  → validate     ValidationIssue[]  — is the data correct?
-  → checklist    ChecklistItem[]    — is the product ready to publish?
-  ──────── human review ────────
-  → enrich       description + category / property suggestions (LLMProvider)
-  → images       staged jobs: generating → removing_bg → done (ImageProvider)
-  → export       payload builder + idempotent taxonomy writes (ShopClient)
-```
+The platform turns supplier input into one standardized product workflow:
+
+```text
+Supplier PDF / image
+        ↓
+Document extraction
+        ↓
+Raw supplier product
+        ↓
+Normalization
+        ↓
+Validation + completion
+        ↓
+Human review & editing
+        ↓
+AI-assisted enrichment
+        ↓
+Image generation
+        ↓
+Shop export
 
 ```mermaid
 flowchart TD
