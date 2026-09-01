@@ -79,57 +79,79 @@ stay independent of the supplier or source format.
 
 ## Architecture
 
-**One canonical model.** Everything after extraction speaks `NormalizedProduct`,
-and nothing downstream knows which supplier a product came from. Its fields are
-grouped by who fills them: supplier-derived (identity, price, variants, material,
-care), reviewer-set (product type, size chart, final categories and properties),
-and enrichment (description + suggestions).
+### One product model after normalization
 
-**Every external dependency is an interface with an offline mock.** Document
-extraction, the LLM, image generation, object storage and the shop are each an
-`abc.ABC`; downstream code imports the interface, never a concrete client. A real
-provider is a new class and one registration line, and no vendor SDK is imported
-outside its provider module.
+Supplier inputs can look completely different, but after normalization the rest
+of the application works with the same `NormalizedProduct` model.
 
-| | Production | This repo |
+That model contains the supplier-derived data such as article numbers, prices,
+variants, material and care instructions, together with fields added during
+review and enrichment such as categories, properties and descriptions.
+
+This keeps the downstream pipeline independent of the supplier that originally
+provided the product.
+
+### Provider boundaries for external services
+
+External services are hidden behind small provider interfaces. Document
+extraction, LLM enrichment, image generation, object storage and shop access can
+therefore be replaced without changing the rest of the application.
+
+The public repository uses deterministic offline implementations so the entire
+workflow can be run without credentials or external services.
+
+| | Production | Public demo |
 |---|---|---|
-| Document extraction | supplier-specific LLM prompt over a PDF / image | `MockDocumentExtractor` — reads the bundled fictional documents, refuses anything else |
-| Suppliers | around 20 configured | 3 fictional (`AlpineWear`, `UrbanThreads`, `DemoShoes`) |
-| LLM (copy + taxonomy) | hosted LLM | `MockLLMProvider` — deterministic templates + token-overlap category matching |
-| Images | external AI image service | `MockImageProvider` — inline-SVG placeholders |
-| Shop | Shopware 6 Admin API | `MockShopAdapter` — in-memory, builds the full write payload |
-| Object storage | cloud drive | `LocalObjectStorage` |
+| Document extraction | Supplier-specific LLM extraction from PDF / image | `MockDocumentExtractor` over bundled fictional documents |
+| Suppliers | 20+ configured workflows | 3 fictional suppliers |
+| Content enrichment | Hosted LLM | `MockLLMProvider` |
+| Product images | External AI image service | `MockImageProvider` |
+| Shop integration | Shopware 6 Admin API | `MockShopAdapter` |
+| Object storage | Cloud storage | `LocalObjectStorage` |
 
-**Two separate quality gates.** `validate()` asks *is the data correct?* and
-returns typed `ValidationIssue`s (empty name, missing price, duplicate size).
-`build_checklist()` asks *is the product ready to publish?* and returns a typed
-checklist. The UI shows the first as errors and the second as completion
-progress — a half-filled product gets a progress bar, not a wall of warnings.
-Both re-run on every edit.
+### Validation and completion are separate
 
-**Supplier registry, not conditionals.** Adapters register themselves at import
-(`registry.register(AlpineWearAdapter())`); there is no `if supplier == "..."`
-anywhere. Adding a supplier is additive.
+The platform treats incorrect data and incomplete data differently.
 
-### Backend layout
+`validate()` checks whether the product data itself is valid, for example missing
+prices, duplicate sizes or invalid values.
 
-| Path | What's there |
+`build_checklist()` checks whether the product is ready to be exported, for
+example whether a description or category is still missing.
+
+This distinction is also reflected in the UI: real validation problems are shown
+as errors, while unfinished products simply show their completion progress.
+
+### Supplier registry
+
+Structured supplier feeds use registered `SupplierAdapter`s instead of
+supplier-specific conditionals throughout the codebase.
+
+Each adapter converts its source format into `RawSupplierProduct`. Adding another
+structured supplier therefore means adding a new adapter without changing the
+normalization or downstream workflow.
+
+### Backend
+
+| Path | Purpose |
 |---|---|
-| `app/domain/` | Pure data + `PricingPolicy`. No I/O, no framework imports. Pydantic v2 models with computed fields. |
-| `app/services/extraction/` | `DocumentExtractionProvider` + `MockDocumentExtractor`. `documents.py` holds the bundled documents as fixtures — the single source of truth that `scripts/generate_demo_documents.py` renders into the PDF / JPG. |
-| `app/suppliers/` | `SupplierAdapter` interface + registry + 3 adapters. `urbanthreads.py` is the tricky one: a per-size CSV whose rows are grouped back into products, dropping shipping lines and quantity-0 rows. |
-| `app/services/` | The stateless stages — `normalization`, `validation`, `completeness`, `enrichment`, `pipeline` — plus the `llm/`, `shop/` and image boundaries. |
-| `app/api/` | Thin FastAPI routers. Handlers raise domain errors; `errors.py` maps them to HTTP status codes in one place. |
+| `app/domain/` | Core models such as `NormalizedProduct`, `Money`, validation types and pricing rules |
+| `app/services/extraction/` | Document extraction interface, offline mock and fictional demo-document fixtures |
+| `app/suppliers/` | `SupplierAdapter` interface, registry and structured-feed adapters |
+| `app/services/` | Normalization, validation, completion, enrichment, image processing and external-service boundaries |
+| `app/api/` | FastAPI routes and centralized API error handling |
 
 ### Frontend
 
-`App.jsx` is a four-step wizard (import → review → edit → export). `src/lib/api.js`
-is the single API layer — every endpoint wrapped, errors normalized to `ApiError`.
-`src/components/editor/` is the product editor: `EditorWorkspace` keeps one
-editable state object per product, debounces a call to `/review` on every change,
-and on a blocked export scrolls to the first unfinished section.
-`src/components/ui.jsx` is a small component kit on a restrained Tailwind token
-set.
+The frontend is a React/Vite application built around the four main workflow
+steps: **import → review → edit & enrich → export**.
+
+`src/lib/api.js` provides the shared API layer, while the editor keeps a separate
+editable state for each product and continuously re-evaluates validation and
+completion as the user makes changes.
+
+The main editor components live in `src/components/editor/`, with shared UI
+components in `src/components/ui.jsx`.
 
 ## Technical decisions
 
