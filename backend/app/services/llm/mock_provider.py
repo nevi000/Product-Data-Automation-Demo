@@ -1,11 +1,3 @@
-"""Deterministic mock LLM provider.
-
-Produces plausible, varied-but-reproducible output from templates so the demo
-works offline and tests are stable. It mimics the *contract* of a real provider:
-returns an `EnrichmentResult`, picks only from the supplied taxonomy, and never
-invents category names.
-"""
-
 from __future__ import annotations
 
 import hashlib
@@ -28,7 +20,6 @@ _CLOSERS = [
     "Details you notice up close.",
 ]
 
-# keyword -> (group, option) hints, matched against the product name (lowercased)
 _NAME_HINTS: dict[str, tuple[str, str]] = {
     "jacket": ("Product style", "Outdoor"),
     "shell": ("Product style", "Technical"),
@@ -45,7 +36,6 @@ _NAME_HINTS: dict[str, tuple[str, str]] = {
     "long sleeve": ("Sleeve length", "Long sleeve"),
 }
 
-# keyword in product name -> a leaf-category name fragment to prefer
 _CATEGORY_HINTS: dict[str, str] = {
     "beanie": "Headwear",
     "hat": "Headwear",
@@ -75,7 +65,6 @@ _MATERIAL_GUESS: dict[str, str] = {
     "pant": "Cotton-nylon blend",
 }
 
-
 def _pick(options: list[str], seed: str) -> str:
     h = int(hashlib.sha256(seed.encode()).hexdigest(), 16)
     return options[h % len(options)]
@@ -83,7 +72,6 @@ def _pick(options: list[str], seed: str) -> str:
 
 class MockLLMProvider(LLMProvider):
     name = "mock"
-
     def enrich_product(
         self,
         product: NormalizedProduct,
@@ -95,7 +83,6 @@ class MockLLMProvider(LLMProvider):
         seed = product.product_number
         name_l = product.name.lower()
 
-        # --- description ---------------------------------------------------
         opener = _pick(_OPENERS, seed)
         closer = _pick(_CLOSERS, seed + "c")
         material = product.material or _guess_material(name_l)
@@ -109,25 +96,20 @@ class MockLLMProvider(LLMProvider):
             sentence += f" Keywords: {keywords}."
         description = f"{sentence} {closer}"
 
-        # --- categories (choose from the shop tree only) -----------------
         categories = _match_categories(product, available_categories, seed)
 
-        # --- properties -------------------------------------------------
         properties: dict[str, str] = {}
 
-        # colour: exact match against the Color option list
         for opt in available_properties.get("Color", []):
             if product.color and opt.lower() == product.color.strip().lower():
                 properties["Color"] = opt
                 break
 
-        # name-keyword hints
         for kw, (group, option) in _NAME_HINTS.items():
             if kw in name_l and group in available_properties:
                 if option in available_properties[group]:
                     properties.setdefault(group, option)
 
-        # a sleeve-length default for tops that gave no hint
         if "Sleeve length" in available_properties and "Sleeve length" not in properties:
             if any(w in name_l for w in ("tee", "top", "crew", "shirt")):
                 properties["Sleeve length"] = "Short sleeve" if "tee" in name_l else "Long sleeve"
@@ -138,13 +120,11 @@ class MockLLMProvider(LLMProvider):
             properties=properties,
         )
 
-
 def _guess_material(name_l: str) -> str | None:
     for kw, mat in _MATERIAL_GUESS.items():
         if kw in name_l:
             return mat
     return None
-
 
 def _stem(token: str) -> str:
     return token[:-1] if token.endswith("s") and len(token) > 3 else token
