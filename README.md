@@ -72,9 +72,10 @@ flowchart TD
     VAL -. "issues + checklist for review" .-> UI
 ```
 
-A `SupplierAdapter` (JSON / CSV / HTML) is a second, developer-facing entry point
-for suppliers that ship a machine-readable feed. It emits the same
-`RawSupplierProduct` and joins the pipeline at `normalize`.
+For suppliers that already provide structured data, the platform also supports
+JSON, CSV, and HTML imports through `SupplierAdapter`s. Each adapter converts its
+input into the same `RawSupplierProduct` format, so the rest of the pipeline can
+stay independent of the supplier or source format.
 
 ## Architecture
 
