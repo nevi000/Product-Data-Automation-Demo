@@ -105,7 +105,6 @@ Stateless transformations + the provider boundaries.
   (`InMemoryJobStore` here; production uses an on-disk store re-read on every
   call so jobs survive across worker processes).
 - `storage.py` — `ObjectStorage` ABC + `LocalObjectStorage`.
-- `auth.py` — signed-cookie session sample. **Not wired into the app.**
 
 ### `app/api`
 Thin FastAPI routers. Handlers raise domain errors; `errors.py` maps them to
