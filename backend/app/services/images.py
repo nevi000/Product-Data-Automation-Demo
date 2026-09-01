@@ -1,23 +1,3 @@
-"""Image pipeline.
-
-The production system turns a raw supplier photo (garment on a hanger) into
-shop-ready images through an external AI service: a `product-to-model` render,
-optionally followed by a `background-remove` pass. Each request is a job with
-1–2 stages, polled to completion.
-
-Two pieces of that engineering are worth keeping:
-
-1. **A staged job model** — a job advances `generating -> removing_bg -> done`,
-   and the second stage is only started once the first completes.
-2. **A job store that is the single source of truth** — the production store is
-   an on-disk file, re-read on every call, so jobs survive across multiple
-   worker processes. Here it is an injectable `JobStore` with an in-memory
-   default; the contract is the same.
-
-The provider is mocked: it "completes" instantly and returns a deterministic
-placeholder image URL.
-"""
-
 from __future__ import annotations
 
 import abc
@@ -32,20 +12,17 @@ from pydantic import BaseModel, Field, computed_field
 
 
 class ImageKind(StrEnum):
-    MODEL_SHOT = "model_shot"      # garment worn by a model, background removed
-    LIFESTYLE = "lifestyle"       # worn, in a scene, background kept
-    PACKSHOT = "packshot"        # garment only, isolated on white
-
+    MODEL_SHOT = "model_shot"
+    LIFESTYLE = "lifestyle"
+    PACKSHOT = "packshot"
 
 _NEEDS_BG_REMOVAL = {ImageKind.MODEL_SHOT}
-
 
 class JobStage(StrEnum):
     GENERATING = "generating"
     REMOVING_BG = "removing_bg"
     DONE = "done"
     FAILED = "failed"
-
 
 class ImageJob(BaseModel):
     id: str
@@ -64,9 +41,6 @@ class ImageJob(BaseModel):
             return "failed"
         return "processing"
 
-
-# --- job store -------------------------------------------------------------
-
 class JobStore(abc.ABC):
     @abc.abstractmethod
     def get(self, job_id: str) -> ImageJob | None: ...
@@ -76,7 +50,6 @@ class JobStore(abc.ABC):
 
     @abc.abstractmethod
     def evict_older_than(self, max_age_seconds: float) -> None: ...
-
 
 class InMemoryJobStore(JobStore):
     def __init__(self) -> None:
@@ -98,9 +71,6 @@ class InMemoryJobStore(JobStore):
                 k: v for k, v in self._jobs.items() if v.created_at >= cutoff
             }
 
-
-# --- provider -------------------------------------------------------------
-
 class ImageProvider(abc.ABC):
     @abc.abstractmethod
     def render(self, source_image: bytes, kind: ImageKind, prompt: str) -> str: ...
@@ -108,23 +78,14 @@ class ImageProvider(abc.ABC):
     @abc.abstractmethod
     def remove_background(self, image_url: str) -> str: ...
 
-
-# Editorial vector "renders": filled 2-tone shapes on a soft studio backdrop.
-# Deterministic and fully self-contained (one inline SVG, no network) so the
-# demo and its screenshots work offline. The `token` (a content hash) is stamped
-# as a subtle watermark so the asset reads as a generated mock, not a real photo.
-
-_STUDIO = {  # (top, bottom) of the backdrop sweep
+_STUDIO = {
     ImageKind.MODEL_SHOT: ("#f1f2f6", "#e2e4ec"),
     ImageKind.LIFESTYLE: ("#eef2ef", "#dde7e0"),
     ImageKind.PACKSHOT: ("#f4f3f0", "#eae8e2"),
 }
 _GARMENT = {"base": "#59698a", "shade": "#4a586f", "light": "#7181a1", "seam": "#3b4760"}
 
-
 def _jacket_unit() -> str:
-    """A front-facing zip jacket in a 360x470 box (shoulders at y=30), built from
-    filled shapes with a shaded side and a lit shoulder for depth."""
     g = _GARMENT
     return (
         f'<path d="M120 30 36 84 60 250 128 150Z" fill="{g["shade"]}"/>'
@@ -139,9 +100,7 @@ def _jacket_unit() -> str:
         f'<line x1="124" y1="452" x2="236" y2="452" stroke="{g["light"]}" stroke-width="2"/>'
     )
 
-
 def _mannequin() -> str:
-    """A minimal headless dress form on a stand, sized to sit under the jacket."""
     return (
         '<ellipse cx="381" cy="922" rx="80" ry="14" fill="#c3c8d2"/>'
         '<rect x="374" y="560" width="14" height="362" fill="#c8ccd5"/>'
@@ -152,9 +111,7 @@ def _mannequin() -> str:
         'L381 566Z" fill="#0b1220" fill-opacity="0.08"/>'
     )
 
-
 def _compose(kind: ImageKind, *, cutout: bool) -> str:
-    """Return the inner SVG markup (no <svg> wrapper) for one render."""
     if cutout:
         checker = (
             '<pattern id="t" width="92" height="92" patternUnits="userSpaceOnUse">'
@@ -214,7 +171,6 @@ def _compose(kind: ImageKind, *, cutout: bool) -> str:
             '<path d="M326 574 352 660 338 668 312 590Z" fill="#4a586f"/>'
         )
 
-    # MODEL_SHOT
     return (
         defs
         + '<rect y="786" width="762" height="314" fill="#dadde5"/>'
@@ -250,8 +206,6 @@ def _placeholder_svg(kind: ImageKind, token: str, *, cutout: bool = False) -> st
 
 
 class MockImageProvider(ImageProvider):
-    """Returns deterministic, self-contained placeholder images; no network, no cost."""
-
     def render(self, source_image: bytes, kind: ImageKind, prompt: str) -> str:
         token = hashlib.sha1(
             f"{kind}:{prompt}:{len(source_image)}".encode()
@@ -262,16 +216,12 @@ class MockImageProvider(ImageProvider):
         token = hashlib.sha1(image_url.encode()).hexdigest()[:8]
         return _placeholder_svg(ImageKind.MODEL_SHOT, token, cutout=True)
 
-
-# --- pipeline -------------------------------------------------------------
-
 _JOB_MAX_AGE = 24 * 60 * 60
 _PROMPTS = {
     ImageKind.MODEL_SHOT: "full-body model wearing this exact garment, studio lighting",
     ImageKind.LIFESTYLE: "model wearing this exact garment in a natural setting",
     ImageKind.PACKSHOT: "the garment only, isolated on a clean white background",
 }
-
 
 class ImagePipeline:
     def __init__(
@@ -304,8 +254,6 @@ class ImagePipeline:
         return self._advance(job)
 
     def _advance(self, job: ImageJob) -> ImageJob:
-        """Move a job one stage forward. In production each call maps to a poll
-        of the external service; the mock provider is always 'ready'."""
         if job.stage is JobStage.GENERATING:
             if job.kind in _NEEDS_BG_REMOVAL:
                 job.stage = JobStage.REMOVING_BG
@@ -316,6 +264,4 @@ class ImagePipeline:
             job.stage = JobStage.DONE
         self.store.put(job)
         return job
-
-
 pipeline = ImagePipeline()
