@@ -50,6 +50,7 @@ AI-assisted enrichment
 Image generation
         ↓
 Shop export
+```
 
 ```mermaid
 flowchart TD
