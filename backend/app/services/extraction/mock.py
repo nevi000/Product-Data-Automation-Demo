@@ -1,17 +1,8 @@
-"""Deterministic, offline mock document extractor.
+"""Deterministic offline mock document extractor.
 
-Stands in for the production step "send the PDF + a supplier-specific prompt to a
-hosted LLM, parse the JSON reply". Here the reply is fixed per bundled document
-(`documents.py`). No network, no API key, fully reproducible.
-
-It still models the real boundary:
-
-* it only accepts PDF / image media types,
-* it only recognizes the bundled fictional documents (an uploaded arbitrary PDF
-  raises `DocumentNotRecognized`, the same way a real prompt would return
-  nothing usable for an unknown layout),
-* it returns loosely-typed `RawSupplierProduct`s — normalization and validation
-  happen in later stages, exactly as in production.
+Returns the fixed fixtures from documents.py instead of calling an LLM. Still
+enforces the real boundary: PDF/image only, and an uploaded file is only
+accepted if its bytes match a bundled document (SHA-256).
 """
 
 from __future__ import annotations
