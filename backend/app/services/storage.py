@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import abc
 import re
 import shutil
@@ -17,6 +18,7 @@ class ObjectStorage(abc.ABC):
         self, product_name: str, image_paths: list[Path]
     ) -> dict:
         ...
+
 class LocalObjectStorage(ObjectStorage):
     def __init__(self, root: Path) -> None:
         self.root = root

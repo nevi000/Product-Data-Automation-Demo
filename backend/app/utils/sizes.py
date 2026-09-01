@@ -1,12 +1,3 @@
-"""Size presets, product types and size charts.
-
-Suppliers list sizes inconsistently (a full run "34-46", a subset, or none at
-all). The UI lets a reviewer pick a product type — which implies a size preset —
-and a from/to range; this module resolves that to an ordered list.
-
-The presets, product types and size charts are generic apparel/footwear concepts.
-"""
-
 from __future__ import annotations
 
 SIZE_PRESETS: dict[str, list[str]] = {
@@ -29,8 +20,6 @@ SIZE_PRESET_LABELS: dict[str, str] = {
     "one_size": "One size",
 }
 
-# A product type is what the reviewer actually picks. It maps to a size preset
-# (or to no sizes at all for home / travel goods).
 PRODUCT_TYPES: list[dict[str, str | None]] = [
     {"key": "womens_top", "label": "Women's top / knitwear", "size_preset": "alpha"},
     {"key": "womens_bottom", "label": "Women's trousers", "size_preset": "womens_numeric"},
@@ -47,8 +36,6 @@ PRODUCT_TYPES: list[dict[str, str | None]] = [
 
 _PRODUCT_TYPE_INDEX = {pt["key"]: pt for pt in PRODUCT_TYPES}
 
-# Fictional size charts a shop might maintain. The reviewer attaches one so the
-# storefront can show a fit guide.
 SIZE_CHARTS: list[dict[str, str]] = [
     {"id": "sc_womens_apparel", "name": "Women's Apparel"},
     {"id": "sc_mens_apparel", "name": "Men's Apparel"},
@@ -59,15 +46,12 @@ SIZE_CHARTS: list[dict[str, str]] = [
     {"id": "sc_headwear", "name": "Headwear"},
 ]
 
-
 def preset_sizes(preset: str) -> list[str]:
     if preset not in SIZE_PRESETS:
         raise ValueError(f"Unknown size preset: {preset!r}")
     return list(SIZE_PRESETS[preset])
 
-
 def size_range(preset: str, size_from: str, size_to: str) -> list[str]:
-    """Return the slice of a preset between two sizes (inclusive)."""
     sizes = preset_sizes(preset)
     if size_from not in sizes:
         raise ValueError(f"{size_from!r} is not in preset {preset!r}")
@@ -78,28 +62,23 @@ def size_range(preset: str, size_from: str, size_to: str) -> list[str]:
         raise ValueError(f"{size_from!r} comes after {size_to!r} in {preset!r}")
     return sizes[i : j + 1]
 
-
 def list_presets() -> list[dict[str, str]]:
     return sorted(
         ({"key": k, "label": SIZE_PRESET_LABELS[k]} for k in SIZE_PRESETS),
         key=lambda p: p["label"].lower(),
     )
 
-
 def list_product_types() -> list[dict[str, str | None]]:
     return list(PRODUCT_TYPES)
 
-
 def list_size_charts() -> list[dict[str, str]]:
     return list(SIZE_CHARTS)
-
 
 def preset_for_product_type(product_type: str) -> str | None:
     pt = _PRODUCT_TYPE_INDEX.get(product_type)
     if pt is None:
         raise ValueError(f"Unknown product type: {product_type!r}")
     return pt["size_preset"]
-
 
 def sizes_for_product_type(product_type: str) -> list[str]:
     preset = preset_for_product_type(product_type)
