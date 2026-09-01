@@ -1,9 +1,3 @@
-"""Supplier registry.
-
-Mirrors the production design: suppliers are *registered*, not hard-wired into
-call sites. Everything else asks the registry for an adapter by id.
-"""
-
 from __future__ import annotations
 
 from app.suppliers.alpinewear import AlpineWearAdapter
@@ -31,7 +25,6 @@ class SupplierRegistry:
         return sorted(
             (a.meta for a in self._adapters.values()), key=lambda m: m.name.lower()
         )
-
 
 registry = SupplierRegistry()
 registry.register(AlpineWearAdapter())
