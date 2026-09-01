@@ -194,7 +194,3 @@ frontend/src/
   components/        wizard steps + editor sections + UI kit
 demo_data/           the 3 fictional documents + 3 structured feeds
 ```
-
-## License
-
-MIT — see [`LICENSE`](LICENSE).
