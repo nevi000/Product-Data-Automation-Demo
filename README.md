@@ -28,6 +28,15 @@ and easy to get wrong.
 The platform turns that fragmented workflow into one structured pipeline with a
 human review and editing step before products are published.
 
+## Screenshots
+
+| | |
+|---|---|
+| **Import** — pick a bundled supplier document | **Review** — extracted source vs. normalized product |
+| ![Import screen](docs/screenshots/import.png) | ![Review screen](docs/screenshots/review-normalization.png) |
+| **Editor** — general info and the live completion rail | **Editor** — variants, per-size EANs and the category tree |
+| ![Editor overview](docs/screenshots/editor-overview.png) | ![Editor enrichment](docs/screenshots/editor-enrichment.png) |
+
 ## Pipeline
 
 The platform turns supplier input into one standardized product workflow:
@@ -218,6 +227,7 @@ editing and enrichment, and finally shop export.
 
 Structured JSON, CSV, and HTML inputs are also available through **Developer
 tools** on the import screen.
+
 ## Tests
 
 ```bash
