@@ -230,7 +230,7 @@ tools** on the import screen.
 ## Tests
 
 ```bash
-cd backend && pytest          # 95 tests
+cd backend && pytest          # 100 tests
 ruff check .
 cd ../frontend && npm run build && npx eslint .
 ```
