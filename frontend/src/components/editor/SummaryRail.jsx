@@ -47,7 +47,7 @@ export default function SummaryRail({
   const checklist = review.checklist || []
   const doneCount = checklist.filter((c) => c.done).length
   const pct = checklist.length ? Math.round((doneCount / checklist.length) * 100) : 0
-  const variantCount = product.variants.length || 1
+  const variantCount = product.variants.filter((v) => v.active).length
 
   async function doExport() {
     setBusy(true)
@@ -60,7 +60,6 @@ export default function SummaryRail({
   return (
     <aside className="scroll-slim lg:sticky lg:top-sticky lg:max-h-[calc(100vh-5.5rem)] lg:self-start lg:overflow-y-auto">
       <div className="overflow-hidden rounded-lg border border-hairline bg-surface shadow-raised">
-        {/* name + sku */}
         <div className="px-5 pb-4 pt-5">
           <h3 className="text-[15px] font-semibold leading-snug tracking-[-0.01em] text-ink">
             {product.name}
@@ -71,7 +70,6 @@ export default function SummaryRail({
           </p>
         </div>
 
-        {/* price + variant count */}
         <div className="grid grid-cols-2 divide-x divide-hairline border-y border-hairline">
           <div className="px-5 py-3">
             <p className="tabular text-[21px] font-semibold leading-none tracking-[-0.02em] text-ink">
@@ -89,7 +87,6 @@ export default function SummaryRail({
           </div>
         </div>
 
-        {/* the rest of the numbers */}
         <div className="px-5 py-2.5">
           <MetricRow label="Purchase price" value={money(product.purchase_price)} />
           <MetricRow label="Categories" value={product.categories.length} />

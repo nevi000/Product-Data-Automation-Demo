@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { api } from '../../lib/api'
 import { Button, Icon, IconButton, SectionCard, Skeleton } from '../ui'
 
@@ -17,6 +17,7 @@ const STAGE_TEXT = { removing_bg: 'Removing background…', generating: 'Generat
 export default function ImagesSection({ jobs, setJobs, imageUrls, onImagesChange, disabled, highlighted }) {
   const timers = useRef({})
   const lastUrls = useRef('')
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     const urls = jobs.filter((j) => j.status === 'completed' && j.image_url).map((j) => j.image_url)
@@ -50,16 +51,22 @@ export default function ImagesSection({ jobs, setJobs, imageUrls, onImagesChange
       } catch {
         clearInterval(timers.current[id])
         delete timers.current[id]
+        setJobs((prev) => prev.map((j) => (j.id === id ? { ...j, status: 'failed' } : j)))
       }
     }, 650)
   }
 
   async function addJob(kind) {
-    const blob = await (await fetch(PIXEL)).blob()
-    const file = new File([blob], 'raw.png', { type: 'image/png' })
-    const job = await api.startImageJob(file, kind)
-    setJobs((prev) => [...prev, job])
-    if (job.status === 'processing') poll(job.id)
+    setError(null)
+    try {
+      const blob = await (await fetch(PIXEL)).blob()
+      const file = new File([blob], 'raw.png', { type: 'image/png' })
+      const job = await api.startImageJob(file, kind)
+      setJobs((prev) => [...prev, job])
+      if (job.status === 'processing') poll(job.id)
+    } catch {
+      setError('Image generation failed.')
+    }
   }
 
   function removeJob(id) {
@@ -85,6 +92,7 @@ export default function ImagesSection({ jobs, setJobs, imageUrls, onImagesChange
         ))
       }
     >
+      {error && <p className="mb-3 text-meta text-critical">{error}</p>}
       {jobs.length === 0 ? (
         <div className="flex items-center gap-3 py-1 text-[13px] text-ink-soft">
           <span className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-surface-inset text-ink-faint">

@@ -79,6 +79,7 @@ export default function CategoriesSection({ product, patch, catalog, keywords, d
   const selected = product.categories
   const [suggestions, setSuggestions] = useState([])
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
 
   function toggle(path) {
     patch({
@@ -88,9 +89,12 @@ export default function CategoriesSection({ product, patch, catalog, keywords, d
 
   async function suggest() {
     setLoading(true)
+    setError(null)
     try {
       const result = await api.suggest(product, keywords)
       setSuggestions(result.categories.filter((c) => !selected.includes(c)))
+    } catch {
+      setError('Could not generate suggestions.')
     } finally {
       setLoading(false)
     }
@@ -113,6 +117,7 @@ export default function CategoriesSection({ product, patch, catalog, keywords, d
       }
     >
       <div className="space-y-5">
+        {error && <p className="text-meta text-critical">{error}</p>}
         <div>
           <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-faint">
             Selected
