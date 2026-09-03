@@ -13,6 +13,8 @@ and workflow using fictional suppliers and offline providers.
 Employer code, supplier data, prompts, credentials, and business
 rules are not included.
 
+![Product Data Automation Platform](docs/screenshots/editor-overview.png)
+
 ## The problem
 
 Product onboarding was highly manual: supplier documents arrived in different
@@ -27,15 +29,6 @@ and easy to get wrong.
 
 The platform turns that fragmented workflow into one structured pipeline with a
 human review and editing step before products are published.
-
-## Screenshots
-
-| | |
-|---|---|
-| **Import** — pick a bundled supplier document | **Review** — extracted source vs. normalized product |
-| ![Import screen](docs/screenshots/import.png) | ![Review screen](docs/screenshots/review-normalization.png) |
-| **Editor** — general info and the live completion rail | **Editor** — variants, per-size EANs and the category tree |
-| ![Editor overview](docs/screenshots/editor-overview.png) | ![Editor enrichment](docs/screenshots/editor-enrichment.png) |
 
 ## Pipeline
 
@@ -85,6 +78,8 @@ For suppliers that already provide structured data, the platform also supports
 JSON, CSV, and HTML imports through `SupplierAdapter`s. Each adapter converts its
 input into the same `RawSupplierProduct` format, so the rest of the pipeline can
 stay independent of the supplier or source format.
+
+![Extraction and normalization review](docs/screenshots/review-normalization.png)
 
 ## Architecture
 
@@ -162,6 +157,8 @@ completion as the user makes changes.
 The main editor components live in `src/components/editor/`, with shared UI
 components in `src/components/ui.jsx`.
 
+![Product editing and enrichment](docs/screenshots/editor-enrichment.png)
+
 ## Technical decisions
 
 | Decision | Why |
@@ -179,6 +176,8 @@ components in `src/components/ui.jsx`.
 
 The demo runs entirely offline. No API keys, credentials, or external services
 are required.
+
+![Supplier document import](docs/screenshots/import.png)
 
 ### Backend
 
