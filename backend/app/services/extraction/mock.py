@@ -1,9 +1,4 @@
-"""Deterministic offline mock document extractor.
-
-Returns the fixed fixtures from documents.py instead of calling an LLM. Still
-enforces the real boundary: PDF/image only, and an uploaded file is only
-accepted if its bytes match a bundled document (SHA-256).
-"""
+"""Offline mock document extractor: returns the bundled fixtures instead of calling an LLM."""
 
 from __future__ import annotations
 
@@ -19,14 +14,14 @@ from app.services.extraction.base import (
 from app.services.extraction.documents import DEMO_DOCUMENTS, DemoDocument, DemoLine
 
 
-def _to_raw(supplier_id: str, filename: str, line: DemoLine) -> RawSupplierProduct:
+def _to_raw(demo: DemoDocument, line: DemoLine) -> RawSupplierProduct:
     return RawSupplierProduct(
-        supplier_id=supplier_id,
+        supplier_id=demo.supplier_id,
         source_reference=line.source_reference,
         model_name=line.model_name,
         color_name=line.color_name,
         color_code=line.color_code,
-        manufacturer=DEMO_DOCUMENTS[supplier_id].supplier_name,
+        manufacturer=demo.supplier_name,
         material=line.material,
         care_instructions=line.care_instructions,
         sizes=list(line.sizes),
@@ -35,7 +30,7 @@ def _to_raw(supplier_id: str, filename: str, line: DemoLine) -> RawSupplierProdu
         purchase_price=line.purchase_price,
         suggested_retail_price=line.suggested_retail_price,
         raw={
-            "document": filename,
+            "document": demo.filename,
             "position": line.position,
             "extracted_by": "MockDocumentExtractor",
         },
@@ -64,7 +59,7 @@ class MockDocumentExtractor(DocumentExtractionProvider):
                 '"Developer tools".'
             )
 
-        return [_to_raw(supplier_id, demo.filename, line) for line in demo.lines]
+        return [_to_raw(demo, line) for line in demo.lines]
 
     @staticmethod
     def _matches_bundled(demo: DemoDocument, document: bytes) -> bool:

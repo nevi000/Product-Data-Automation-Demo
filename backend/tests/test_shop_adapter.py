@@ -34,6 +34,12 @@ def test_create_product_returns_variant_and_category_counts():
     assert created.url.startswith("https://demo-shop.local/admin/product/")
 
 
+def test_product_without_size_variants_has_zero_variant_count():
+    shop = MockShopAdapter()
+    created = shop.create_product(_product(variants=[]))
+    assert created.variant_count == 0
+
+
 def test_payload_carries_reviewer_classification():
     shop = MockShopAdapter()
     created = shop.create_product(_product())

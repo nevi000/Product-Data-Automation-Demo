@@ -14,6 +14,9 @@ from app.services.shop.base import ShopProduct
 
 router = APIRouter()
 
+_MAX_UPLOAD_BYTES = 5 * 1024 * 1024
+_ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png"}
+
 class EnrichRequest(BaseModel):
     product: NormalizedProduct
     keywords: str = ""
@@ -41,6 +44,10 @@ async def create_image_job(
     data = await file.read()
     if not data:
         raise HTTPException(status_code=400, detail="Empty image.")
+    if len(data) > _MAX_UPLOAD_BYTES:
+        raise HTTPException(status_code=413, detail="Image too large (max 5 MB).")
+    if file.content_type not in _ALLOWED_IMAGE_TYPES:
+        raise HTTPException(status_code=415, detail="Upload a JPEG or PNG image.")
     return pipeline.start(data, kind)
 
 @router.get("/products/images/{job_id}", response_model=ImageJob)

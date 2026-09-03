@@ -32,12 +32,8 @@ def install(app) -> None:
 
     @app.exception_handler(LLMQuotaError)
     async def _quota(_: Request, exc: LLMQuotaError):
-        return JSONResponse(status_code=402, content={"detail": str(exc)})
+        return JSONResponse(status_code=429, content={"detail": str(exc)})
 
     @app.exception_handler(ShopWriteError)
     async def _shop(_: Request, exc: ShopWriteError):
         return JSONResponse(status_code=409, content={"detail": str(exc)})
-
-    @app.exception_handler(KeyError)
-    async def _key(_: Request, exc: KeyError):
-        return JSONResponse(status_code=404, content={"detail": str(exc).strip("'")})

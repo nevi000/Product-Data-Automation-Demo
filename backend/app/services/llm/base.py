@@ -8,7 +8,7 @@ from app.domain.models import NormalizedProduct
 
 
 class LLMQuotaError(RuntimeError):
-    """Provider rate-limit / quota exhausted. Mapped to HTTP 402 at the edge."""
+    """Provider rate-limit / quota exhausted. Mapped to HTTP 429 at the edge."""
 
 class EnrichmentResult(BaseModel):
     description: str

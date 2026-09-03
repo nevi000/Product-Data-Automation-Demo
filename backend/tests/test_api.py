@@ -80,6 +80,35 @@ def test_full_flow_ingest_enrich_complete_export(client, demoshoes_catalog):
     assert exported.json()["variant_count"] == len(product["variants"])
 
 
+def test_image_job_accepts_a_png(client):
+    r = client.post(
+        "/api/products/images",
+        files={"file": ("photo.png", b"\x89PNG\r\n\x1a\n" + b"0" * 32, "image/png")},
+        data={"kind": "packshot"},
+    )
+    assert r.status_code == 200
+    assert r.json()["status"] in {"processing", "completed"}
+
+
+def test_image_job_rejects_unsupported_type(client):
+    r = client.post(
+        "/api/products/images",
+        files={"file": ("photo.gif", b"GIF89a", "image/gif")},
+        data={"kind": "packshot"},
+    )
+    assert r.status_code == 415
+
+
+def test_image_job_rejects_oversized_upload(client):
+    big = b"0" * (5 * 1024 * 1024 + 1)
+    r = client.post(
+        "/api/products/images",
+        files={"file": ("photo.png", big, "image/png")},
+        data={"kind": "packshot"},
+    )
+    assert r.status_code == 413
+
+
 def test_export_blocked_by_data_error(client):
     product = {
         "supplier_id": "x",

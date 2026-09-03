@@ -2,11 +2,13 @@ import pytest
 
 from app.services.extraction import (
     DEMO_DOCUMENTS,
+    DemoDocument,
     DocumentNotRecognized,
     MockDocumentExtractor,
     UnsupportedMediaType,
     get_extractor,
 )
+from app.services.extraction.documents import DemoLine
 from app.services.normalization import normalize
 
 extractor = MockDocumentExtractor()
@@ -83,3 +85,26 @@ def test_unknown_supplier_is_not_recognized(alpinewear_document):
         extractor.extract(
             supplier_id="nope", document=alpinewear_document, media_type="application/pdf"
         )
+
+
+def test_injected_document_supplies_its_own_metadata(alpinewear_document):
+    doc = DemoDocument(
+        supplier_id="acme",
+        supplier_name="Acme Supply Co",
+        filename="AlpineWear_OrderConfirmation.pdf",
+        media_type="application/pdf",
+        kind="Order confirmation",
+        doc_number="ACME-1",
+        doc_date="2026-01-01",
+        lines=[DemoLine(position=1, source_reference="ACME-1", model_name="Widget")],
+    )
+    ext = MockDocumentExtractor(documents={"acme": doc})
+
+    raw = ext.extract(
+        supplier_id="acme", document=alpinewear_document, media_type="application/pdf"
+    )
+    assert len(raw) == 1
+    assert raw[0].supplier_id == "acme"
+    assert raw[0].manufacturer == "Acme Supply Co"
+    assert raw[0].raw["document"] == "AlpineWear_OrderConfirmation.pdf"
+    assert "acme" not in DEMO_DOCUMENTS
